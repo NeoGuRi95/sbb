@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommonUtil {
 
-    Random rnd = new Random();
+    private Random rnd = new Random();
 
     public String markdown(String markdown) {
         Parser parser = Parser.builder().build();

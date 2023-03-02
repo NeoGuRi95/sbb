@@ -1,0 +1,29 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <span>*서울특별시 공공서비스 예약 시스템에서 받아온 정보입니다.</span>
+    <table class="table">
+        <thead class="table-dark">
+            <tr class="text-center">
+                <th>테니스장</th>
+                <th>코트 번호</th>
+                <th>날짜</th>
+                <th>예약 현황</th>
+                <th>링크</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="text-center" th:each="coatInfo : ${coatInfoList}">
+                <td th:text="${coatInfo.name}"></td>
+                <td th:text="${coatInfo.coatNumber}"></td>
+                <td th:text="${#temporals.format(coatInfo.date, 'yyyy-MM-dd')}"></td>
+                <td th:text="${coatInfo.reservation}"></td>
+                <td>
+                    <a th:href="${coatInfo.link}" target='_blank' th:text="바로가기"></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+</script>
+</html>

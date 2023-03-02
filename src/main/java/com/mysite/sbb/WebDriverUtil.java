@@ -1,6 +1,7 @@
 package com.mysite.sbb;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import com.mysite.sbb.tennis.Coat;
 import com.mysite.sbb.tennis.CoatRepository;
@@ -50,7 +52,9 @@ public class WebDriverUtil {
         return options;
     }
 
-    public List<Coat> getBoramaeCoatInfo() throws InterruptedException {
+    @Scheduled(cron = "0 0/30 * * * ?") // 30분 마다
+    public void getBoramaeCoatInfo() throws InterruptedException {
+        log.info("reservation information of Boramae tennis coat crawling start");
         System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
         WebDriver driver = new ChromeDriver(getOption());
 
@@ -89,6 +93,7 @@ public class WebDriverUtil {
                                             .reservation(num.getText())
                                             .name("보라매")
                                             .link(postUrl + coatId)
+                                            .modifyDate(LocalDateTime.now())
                                             .build());
                 }
             }
@@ -98,7 +103,6 @@ public class WebDriverUtil {
         driver.quit();	//브라우저 닫기
 
         coatRepository.saveAll(coatInfoList);
-
-        return coatInfoList;
+        log.info("reservation information of Boramae tennis coat crawling end");
     }
 }

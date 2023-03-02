@@ -25,9 +25,9 @@ public class TennisController {
         return "tennis";
     }
 
-    @ResponseBody
-    @GetMapping("/boramae")
-    public String boramaeCoatInfo() throws InterruptedException, JsonProcessingException {
-        return objectMapper.writeValueAsString(webDriverUtil.getBoramaeCoatInfo());
-    }
+    // @ResponseBody
+    // @GetMapping("/boramae")
+    // public String boramaeCoatInfo() throws InterruptedException, JsonProcessingException {
+    //     return objectMapper.writeValueAsString(webDriverUtil.getBoramaeCoatInfo());
+    // }
 }

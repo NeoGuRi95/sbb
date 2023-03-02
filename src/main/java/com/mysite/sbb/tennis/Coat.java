@@ -1,6 +1,7 @@
 package com.mysite.sbb.tennis;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -28,4 +29,6 @@ public class Coat {
     String reservation;
 
     String link;
+
+    LocalDateTime modifyDate;
 }

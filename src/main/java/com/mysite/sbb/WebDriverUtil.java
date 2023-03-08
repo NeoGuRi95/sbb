@@ -21,7 +21,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -50,13 +49,8 @@ public class WebDriverUtil {
 
     public ChromeOptions getDefaultOption() {
         ChromeOptions options = new ChromeOptions();
-        return options;
-    }
-
-    public ChromeOptions getHideBrowserOption() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
-        options.addArguments("--disable-popup-blocking");
+        options.addArguments("no-sandbox");
+        options.addArguments("disable-dev-shm-usage");
         return options;
     }
 

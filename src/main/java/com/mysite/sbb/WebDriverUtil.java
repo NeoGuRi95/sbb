@@ -21,6 +21,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -49,25 +50,29 @@ public class WebDriverUtil {
 
     public ChromeOptions getDefaultOption() {
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
         options.addArguments("no-sandbox");
         options.addArguments("disable-dev-shm-usage");
         return options;
     }
 
-    @Scheduled(cron = "0 0/30 * * * ?") // 30분 마다
+    @Scheduled(cron = "0 0/15 * * * ?") // 15분 마다
     public void getBoramaeCoatInfo() throws InterruptedException {
         log.info("reservation information of Boramae tennis coat crawling start");
         System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
         WebDriver driver = new ChromeDriver(getDefaultOption());
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
 
         driver.get(RESERVATION_HOME_URL);
         Thread.sleep(1000); // 브라우저 로딩 대기
         driver.manage().window().maximize();
 
         WebElement lang = driver.findElement(By.cssSelector(".language"));
-        lang.click();
+        executor.executeScript("arguments[0].click();", lang);
+        // lang.click();
         WebElement kor = driver.findElement(By.cssSelector(".language a")); // 한국어로 변경
-        kor.click();
+        executor.executeScript("arguments[0].click();", kor);
+        // kor.click();
 
         List<Coat> coatInfoList = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -79,7 +84,8 @@ public class WebDriverUtil {
             Thread.sleep(1000); // 브라우저 로딩 대기
 
             WebElement pop_x = driver.findElement(By.className("pop_x")); // 팝업 닫기
-            pop_x.click();
+            executor.executeScript("arguments[0].click();", pop_x);
+            // pop_x.click();
 
             List<WebElement> trList = driver.findElements(By.cssSelector(".tbl_cal tbody td"));
             for (WebElement element : trList) {

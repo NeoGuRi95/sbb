@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Insert title here</title>
+</head>
+
+<body>
+  <h1>2개의 주사위</h1>
+  버튼을 클릭하면 2개의 주사위가 랜덤됩니다.<br><br>
+  <img alt="" id="random1"
+    src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif">
+  <img alt="" id="random2"
+    src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"><br><br>
+  <button type="button" onclick="radom()">주사위를 굴린다</button>
+  <script type="text/javascript">
+    function radom() {
+      let randomNum1 = Math.round(Math.random() * 6);
+      let randomNum2 = Math.round(Math.random() * 6);
+      let randomNum3 = Math.round(Math.random() * 6);
+      let randomNum4 = Math.round(Math.random() * 6);
+      let randomNum5 = Math.round(Math.random() * 6);
+      let randomNum6 = Math.round(Math.random() * 6);
+      if (randomNum1 == 1) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"
+      } else if (randomNum1 == 2) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhnQZy%2Fbtq6LW5qS62%2FAOJu3uPFLeaVVkjAkZVUs1%2Fimg.gif"
+      } else if (randomNum1 == 3) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbYRuiD%2Fbtq6HQd0tDp%2Fhs6OP3kdsLqWKV5bHWZzbK%2Fimg.gif"
+      } else if (randomNum1 == 4) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbG8rVr%2Fbtq6JxZz1hP%2F3WhKeYaAKkL6S11B3LPfuk%2Fimg.gif"
+      } else if (randomNum1 == 5) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FEMxkY%2Fbtq6Gp8KkpC%2FFKtnqwR5HBXMkGjzxgclfK%2Fimg.gif"
+      } else if (randomNum1 == 6) {
+        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FNdGpW%2Fbtq6DRYA7iQ%2FPxZBpN1flIbnRi17XxtiF1%2Fimg.gif"
+      }
+      if (randomNum2 == 1) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"
+      } else if (randomNum2 == 2) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhnQZy%2Fbtq6LW5qS62%2FAOJu3uPFLeaVVkjAkZVUs1%2Fimg.gif"
+      } else if (randomNum2 == 3) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbYRuiD%2Fbtq6HQd0tDp%2Fhs6OP3kdsLqWKV5bHWZzbK%2Fimg.gif"
+      } else if (randomNum2 == 4) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbG8rVr%2Fbtq6JxZz1hP%2F3WhKeYaAKkL6S11B3LPfuk%2Fimg.gif"
+      } else if (randomNum2 == 5) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FEMxkY%2Fbtq6Gp8KkpC%2FFKtnqwR5HBXMkGjzxgclfK%2Fimg.gif"
+      } else if (randomNum2 == 6) {
+        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FNdGpW%2Fbtq6DRYA7iQ%2FPxZBpN1flIbnRi17XxtiF1%2Fimg.gif"
+      }
+    }
+  </script>
+</body>
+
+</html>

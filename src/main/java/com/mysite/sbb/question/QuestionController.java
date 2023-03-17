@@ -31,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 public class QuestionController {
 
+    private static final String QUESTION_FORM = "question_form";
+
     private final QuestionService questionService;
     private final UserService userService;
     private final AnswerService answerService;
@@ -38,8 +40,8 @@ public class QuestionController {
 
     @GetMapping("/question/list")
     public String questionList(Model model,
-        @RequestParam(value = "page", defaultValue = "0") int page,
-        @RequestParam(value = "kw", defaultValue = "") String kw) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "kw", defaultValue = "") String kw) {
         log.info("page:{}, kw:{}", page, kw);
         Page<Question> paging = this.questionService.getList(page, kw, "질문");
         model.addAttribute("paging", paging);
@@ -49,8 +51,8 @@ public class QuestionController {
 
     @GetMapping("/freepost/list")
     public String freepostList(Model model,
-        @RequestParam(value = "page", defaultValue = "0") int page,
-        @RequestParam(value = "kw", defaultValue = "") String kw) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "kw", defaultValue = "") String kw) {
         log.info("page:{}, kw:{}", page, kw);
         Page<Question> paging = this.questionService.getList(page, kw, "자유");
         model.addAttribute("paging", paging);
@@ -60,12 +62,10 @@ public class QuestionController {
 
     @GetMapping(value = "/question/detail/{id}")
     public String detail(Model model, @PathVariable("id") Integer id,
-        AnswerForm answerForm,
-        @RequestParam(value = "answerPage",
-            defaultValue = "0") int answerPage) {
+            AnswerForm answerForm,
+            @RequestParam(value = "answerPage", defaultValue = "0") int answerPage) {
         Question question = this.questionService.hitQuestion(id);
-        Page<Answer> answerPaging =
-            this.answerService.getList(question, answerPage);
+        Page<Answer> answerPaging = this.answerService.getList(question, answerPage);
         model.addAttribute("question", question);
         model.addAttribute("answerPaging", answerPaging);
         return "question_detail";
@@ -75,65 +75,64 @@ public class QuestionController {
     @GetMapping("/question/create")
     public String questionCreate(Model model, QuestionForm questionForm) {
         model.addAttribute("categoryList", categoryService.getList());
-        return "question_form";
+        return QUESTION_FORM;
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/question/create")
     public String questionCreate(Model model, @Valid QuestionForm questionForm,
-        BindingResult bindingResult, Principal principal) {
+            BindingResult bindingResult, Principal principal) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("categoryList", categoryService.getList());
-            return "question_form";
+            return QUESTION_FORM;
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        Category category =
-            this.categoryService.getCategory(questionForm.getCategory());
+        Category category = this.categoryService.getCategory(questionForm.getCategory());
         this.questionService.create(questionForm.getSubject(),
-            questionForm.getContent(), siteUser, category);
+                questionForm.getContent(), siteUser, category);
         return "redirect:/question/list";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/question/modify/{id}")
     public String questionModify(QuestionForm questionForm,
-        @PathVariable("id") Integer id, Principal principal) {
+            @PathVariable("id") Integer id, Principal principal) {
         Question question = this.questionService.getQuestion(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "수정권한이 없습니다.");
+                    "수정권한이 없습니다.");
         }
         questionForm.setSubject(question.getSubject());
         questionForm.setContent(question.getContent());
-        return "question_form";
+        return QUESTION_FORM;
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/question/modify/{id}")
     public String questionModify(@Valid QuestionForm questionForm,
-        BindingResult bindingResult,
-        Principal principal, @PathVariable("id") Integer id) {
+            BindingResult bindingResult,
+            Principal principal, @PathVariable("id") Integer id) {
         if (bindingResult.hasErrors()) {
-            return "question_form";
+            return QUESTION_FORM;
         }
         Question question = this.questionService.getQuestion(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "수정권한이 없습니다.");
+                    "수정권한이 없습니다.");
         }
         this.questionService.modify(question, questionForm.getSubject(),
-            questionForm.getContent());
+                questionForm.getContent());
         return String.format("redirect:/question/detail/%s", id);
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/question/delete/{id}")
     public String questionDelete(Principal principal,
-        @PathVariable("id") Integer id) {
+            @PathVariable("id") Integer id) {
         Question question = this.questionService.getQuestion(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "삭제권한이 없습니다.");
+                    "삭제권한이 없습니다.");
         }
         this.questionService.delete(question);
         return "redirect:/";
@@ -142,7 +141,7 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/question/vote/{id}")
     public String questionVote(Principal principal,
-        @PathVariable("id") Integer id) {
+            @PathVariable("id") Integer id) {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = this.userService.getUser(principal.getName());
         this.questionService.vote(question, siteUser);

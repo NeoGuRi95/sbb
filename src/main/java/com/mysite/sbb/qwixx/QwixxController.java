@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.mysite.sbb.qwixx.dto.GameCreateResponse;
 import com.mysite.sbb.qwixx.dto.GameResponse;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
@@ -29,9 +28,9 @@ public class QwixxController {
   @PostMapping("/qwixx/room")
   @PreAuthorize("isAuthenticated()")
   public String create(Principal principal, Model model) {
-    GameCreateResponse response = qwixxService.createGame(principal.getName());
-    model.addAttribute("gameDto", response);
-    return "gameDetail";
+    GameResponse response = qwixxService.createGame(principal.getName());
+    model.addAttribute("gameResponse", response);
+    return "qwixx";
   }
 
   @GetMapping("/qwixx/room/{id}")
@@ -39,19 +38,27 @@ public class QwixxController {
   public String getRoom(@PathVariable("id") Long id, Principal principal, Model model) {
     SiteUser siteUser = userService.getUser(principal.getName());
     Room room = qwixxService.getRoom(id);
-    if (room.getParticipantsNumber() == 5)
-      return "redirect:/";
     GameResponse response = qwixxService.getGame(room, siteUser);
-    model.addAttribute("gameDto", response);
-    return "gameDetail";
+    if (Boolean.TRUE.equals(response.getFullRoom())) {
+      return "redirect:/";
+    } else {
+      model.addAttribute("gameResponse", response);
+      return "qwixx";
+    }
   }
 
-  @MessageMapping("/qwixx")
-  public void message(StompMessage message) {
-    if (message.getActionType().equals("roll")) {
-      simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), 6);
-    } else if (message.getActionType().equals("ready")) {
-      simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), message);
-    }
+  @MessageMapping("/qwixx/roll")
+  public void roll(StompMessage message) {
+    // simpMessageSendingOperations.convertAndSend("/topic/qwixx/" +
+    // message.getRoomId(), qwixxService.roll());
+    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), "test");
+  }
+
+  @MessageMapping("/qwixx/ready")
+  public void ready(StompMessage message) {
+    SiteUser siteUser = userService.getUser(message.getSender());
+    Room room = qwixxService.getRoom(message.getRoomId());
+    qwixxService.ready(room, siteUser);
+    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), qwixxService.isAllReady(room));
   }
 }

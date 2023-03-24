@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StompMessage {
   private String sender;
-  private String roomId;
-  private String actionType;
+  private Long roomId;
   private Object data;
 }

@@ -17,13 +17,10 @@ public class Room {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private Boolean status;
-
-  private Integer participantsNumber;
+  private String name;
 
   @Builder
-  public Room(Boolean status, Integer participantsNumber) {
-    this.status = status;
-    this.participantsNumber = participantsNumber;
+  public Room(String name) {
+    this.name = name;
   }
 }

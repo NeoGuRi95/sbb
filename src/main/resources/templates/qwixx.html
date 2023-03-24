@@ -1,55 +1,75 @@
-<!DOCTYPE html>
-<html>
+<html lang="en" layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
 
-<head>
-  <meta charset="UTF-8">
-  <title>Insert title here</title>
-</head>
+</div>
 
-<body>
-  <h1>2개의 주사위</h1>
-  버튼을 클릭하면 2개의 주사위가 랜덤됩니다.<br><br>
-  <img alt="" id="random1"
-    src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif">
-  <img alt="" id="random2"
-    src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"><br><br>
-  <button type="button" onclick="radom()">주사위를 굴린다</button>
-  <script type="text/javascript">
-    function radom() {
-      let randomNum1 = Math.round(Math.random() * 6);
-      let randomNum2 = Math.round(Math.random() * 6);
-      let randomNum3 = Math.round(Math.random() * 6);
-      let randomNum4 = Math.round(Math.random() * 6);
-      let randomNum5 = Math.round(Math.random() * 6);
-      let randomNum6 = Math.round(Math.random() * 6);
-      if (randomNum1 == 1) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"
-      } else if (randomNum1 == 2) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhnQZy%2Fbtq6LW5qS62%2FAOJu3uPFLeaVVkjAkZVUs1%2Fimg.gif"
-      } else if (randomNum1 == 3) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbYRuiD%2Fbtq6HQd0tDp%2Fhs6OP3kdsLqWKV5bHWZzbK%2Fimg.gif"
-      } else if (randomNum1 == 4) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbG8rVr%2Fbtq6JxZz1hP%2F3WhKeYaAKkL6S11B3LPfuk%2Fimg.gif"
-      } else if (randomNum1 == 5) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FEMxkY%2Fbtq6Gp8KkpC%2FFKtnqwR5HBXMkGjzxgclfK%2Fimg.gif"
-      } else if (randomNum1 == 6) {
-        document.getElementById("random1").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FNdGpW%2Fbtq6DRYA7iQ%2FPxZBpN1flIbnRi17XxtiF1%2Fimg.gif"
-      }
-      if (randomNum2 == 1) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FvLgiT%2Fbtq6LVk7fAX%2FkJ2Ktj0dkd7VkOmrxnLFkK%2Fimg.gif"
-      } else if (randomNum2 == 2) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhnQZy%2Fbtq6LW5qS62%2FAOJu3uPFLeaVVkjAkZVUs1%2Fimg.gif"
-      } else if (randomNum2 == 3) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbYRuiD%2Fbtq6HQd0tDp%2Fhs6OP3kdsLqWKV5bHWZzbK%2Fimg.gif"
-      } else if (randomNum2 == 4) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbG8rVr%2Fbtq6JxZz1hP%2F3WhKeYaAKkL6S11B3LPfuk%2Fimg.gif"
-      } else if (randomNum2 == 5) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FEMxkY%2Fbtq6Gp8KkpC%2FFKtnqwR5HBXMkGjzxgclfK%2Fimg.gif"
-      } else if (randomNum2 == 6) {
-        document.getElementById("random2").src = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FNdGpW%2Fbtq6DRYA7iQ%2FPxZBpN1flIbnRi17XxtiF1%2Fimg.gif"
-      }
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script layout:fragment="script" type='text/javascript'>
+  var stompClient = null;
+  var roomId = "[[${ roomId }]]";
+
+  console.log('room info : ' + roomId);
+
+  function connect() { // 생성된 소켓과 연결
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+
+      console.log('Connected: ' + frame);
+
+      // 구독 기능을 통해 해당 주소에 메세지가 오면 showChat 함수 호출
+      stompClient.subscribe('/topic/qwixx/' + roomId, function (message) {
+        showChat(JSON.parse(message.body));
+      });
+    });
+  }
+
+  function showChat(chat) { // 수신한 메세지를 출력
+    // DB에 저장된 값을 출력해주는 Thymeleaf와 형태를 맞추기 위해 
+    // 적절한 배치 필요
+
+    var sendDateTime = chat.sendDateTime.split("T"); // 시간과 분 출력 
+    sendDateTime = sendDateTime[1].split(":");
+    $("#chattings").append("<tr><td><span>" + chat.sender +
+      "</span></td><td><span>" + chat.message +
+      "</span></td><td><span>" + sendDateTime[0] +
+      ":" + sendDateTime[1] + "</span></td></tr>");
+  }
+
+  $(function () { // 함수 호출 연결
+    $("form").on('submit', function (e) {
+      e.preventDefault();
+    });
+    $("#chatSend").click(function () { sendChat(); });
+  });
+
+  // 메세지 전송 index.html의 text box에 입력된 값을 읽어온다.
+  function sendChat() {
+    stompClient.send("/pub/qwixx/" + projectId, {},
+      JSON.stringify({
+        'sender': $("#sender").val(),
+        'message': $("#chatMessage").val()
+      }));
+  }
+
+  function disconnect() { // 연결 종료
+    if (stompClient !== null) {
+      stompClient.disconnect();
     }
-  </script>
-</body>
+    console.log("Disconnected");
+  }
+</script>
+<script>
+  //창을 열고 닫을 때 연결과 해제 
+  window.onload = function () {
+    connect();
+  }
+
+  window.BeforeUnloadEvent = function () {
+    disconnect();
+  }
+</script>
 
 </html>

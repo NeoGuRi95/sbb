@@ -37,16 +37,16 @@ public class RoomSiteUser {
   private SiteUser siteUser;
 
   @Convert(converter = IntegerArrayConverter.class)
-  private List<Boolean> redLine;
+  private List<Integer> redLine;
 
   @Convert(converter = IntegerArrayConverter.class)
-  private List<Boolean> yellowLine;
+  private List<Integer> yellowLine;
 
   @Convert(converter = IntegerArrayConverter.class)
-  private List<Boolean> greenLine;
+  private List<Integer> greenLine;
 
   @Convert(converter = IntegerArrayConverter.class)
-  private List<Boolean> blueLine;
+  private List<Integer> blueLine;
 
   @Builder
   public RoomSiteUser(SiteUser siteUser, Room room) {
@@ -55,13 +55,9 @@ public class RoomSiteUser {
   }
 
   public void init() {
-    this.redLine = new ArrayList<>(
-        Arrays.asList(false, false, false, false, false, false, false, false, false, false, false, false));
-    this.yellowLine = new ArrayList<>(
-        Arrays.asList(false, false, false, false, false, false, false, false, false, false, false, false));
-    this.greenLine = new ArrayList<>(
-        Arrays.asList(false, false, false, false, false, false, false, false, false, false, false, false));
-    this.blueLine = new ArrayList<>(
-        Arrays.asList(false, false, false, false, false, false, false, false, false, false, false, false));
+    this.redLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.yellowLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.greenLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.blueLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   }
 }

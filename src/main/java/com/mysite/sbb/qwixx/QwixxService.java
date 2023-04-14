@@ -1,5 +1,6 @@
 package com.mysite.sbb.qwixx;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,14 @@ public class QwixxService {
   private final RoomRepository roomRepository;
   private final UserService userService;
 
+  public List<Room> getRoomList() {
+    return roomRepository.findAll();
+  }
+
   public GameResponse createGame(String username) {
     SiteUser roomCreator = userService.getUser(username);
     Room newRoom = Room.builder()
+        .name(username + LocalDateTime.now())
         .build();
     RoomSiteUser firstRoomSiteUser = RoomSiteUser.builder()
         .siteUser(roomCreator)

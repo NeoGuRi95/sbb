@@ -25,7 +25,13 @@ public class QwixxController {
   private final QwixxService qwixxService;
   private final UserService userService;
 
-  @PostMapping("/qwixx/room")
+  @GetMapping("/qwixx/room/list")
+  public String getQwixxRoomList(Model model) {
+    model.addAttribute("roomList", qwixxService.getRoomList());
+    return "qwixx_room_list";
+  }
+
+  @GetMapping("/qwixx/room")
   @PreAuthorize("isAuthenticated()")
   public String create(Principal principal, Model model) {
     GameResponse response = qwixxService.createGame(principal.getName());
@@ -49,9 +55,9 @@ public class QwixxController {
 
   @MessageMapping("/qwixx/roll")
   public void roll(StompMessage message) {
+    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), qwixxService.roll());
     // simpMessageSendingOperations.convertAndSend("/topic/qwixx/" +
-    // message.getRoomId(), qwixxService.roll());
-    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), "test");
+    // message.getRoomId(), "test");
   }
 
   @MessageMapping("/qwixx/ready")

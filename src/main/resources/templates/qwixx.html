@@ -1,57 +1,34 @@
-<html lang="en" layout:decorate="~{layout}">
+<html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
+  <input class="btn btn-outline-secondary" type="button" id="button-send" onclick="button_click();" value="주사위 던지기">
 
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 <script layout:fragment="script" type='text/javascript'>
   var stompClient = null;
-  var roomId = "[[${ roomId }]]";
+  var roomId = "[[${ gameResponse.roomId }]]";
 
   console.log('room info : ' + roomId);
 
   function connect() { // 생성된 소켓과 연결
     var socket = new SockJS('/ws');
-    var stompClient = Stomp.over(socket);
+    stompClient = Stomp.over(socket);
+
     stompClient.connect({}, function (frame) {
 
       console.log('Connected: ' + frame);
 
-      // 구독 기능을 통해 해당 주소에 메세지가 오면 showChat 함수 호출
+      // 구독 기능을 통해 해당 주소에 메세지가 오면 로그 출력
       stompClient.subscribe('/topic/qwixx/' + roomId, function (message) {
-        showChat(JSON.parse(message.body));
+        console.log(message.body);
       });
     });
   }
 
-  function showChat(chat) { // 수신한 메세지를 출력
-    // DB에 저장된 값을 출력해주는 Thymeleaf와 형태를 맞추기 위해 
-    // 적절한 배치 필요
-
-    var sendDateTime = chat.sendDateTime.split("T"); // 시간과 분 출력 
-    sendDateTime = sendDateTime[1].split(":");
-    $("#chattings").append("<tr><td><span>" + chat.sender +
-      "</span></td><td><span>" + chat.message +
-      "</span></td><td><span>" + sendDateTime[0] +
-      ":" + sendDateTime[1] + "</span></td></tr>");
-  }
-
-  $(function () { // 함수 호출 연결
-    $("form").on('submit', function (e) {
-      e.preventDefault();
-    });
-    $("#chatSend").click(function () { sendChat(); });
-  });
-
-  // 메세지 전송 index.html의 text box에 입력된 값을 읽어온다.
-  function sendChat() {
-    stompClient.send("/pub/qwixx/" + projectId, {},
-      JSON.stringify({
-        'sender': $("#sender").val(),
-        'message': $("#chatMessage").val()
-      }));
+  function button_click() {
+    stompClient.send('/pub/qwixx/roll', {}, JSON.stringify({roomId: roomId, data: "data", sender: "user"}));
   }
 
   function disconnect() { // 연결 종료
@@ -60,8 +37,7 @@
     }
     console.log("Disconnected");
   }
-</script>
-<script>
+
   //창을 열고 닫을 때 연결과 해제 
   window.onload = function () {
     connect();
@@ -71,5 +47,4 @@
     disconnect();
   }
 </script>
-
 </html>

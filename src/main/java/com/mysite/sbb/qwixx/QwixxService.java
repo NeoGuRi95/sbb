@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.mysite.sbb.exception.DataNotFoundException;
 import com.mysite.sbb.exception.ErrorCode;
-import com.mysite.sbb.qwixx.dto.GameResponse;
+import com.mysite.sbb.qwixx.dto.GameInfoResponse;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
 
@@ -28,7 +28,7 @@ public class QwixxService {
     return roomRepository.findAll();
   }
 
-  public GameResponse createGame(String username) {
+  public GameInfoResponse createGame(String username) {
     SiteUser roomCreator = userService.getUser(username);
     Room newRoom = Room.builder()
         .name(username + LocalDateTime.now())
@@ -41,7 +41,7 @@ public class QwixxService {
     roomRepository.save(newRoom);
     roomSiteUserRepository.save(firstRoomSiteUser);
 
-    GameResponse response = new GameResponse();
+    GameInfoResponse response = new GameInfoResponse();
     response.setRoomId(newRoom.getId());
     response.addParticipant(firstRoomSiteUser);
     return response;
@@ -52,8 +52,8 @@ public class QwixxService {
         .orElseThrow(() -> new DataNotFoundException(ErrorCode.RESOURCE_NOT_FOUND));
   }
 
-  public GameResponse getGame(Room room, SiteUser siteUser) {
-    GameResponse response = new GameResponse();
+  public GameInfoResponse getGame(Room room, SiteUser siteUser) {
+    GameInfoResponse response = new GameInfoResponse();
     response.setRoomId(room.getId());
     Optional<RoomSiteUser> optRoomSiteUser = roomSiteUserRepository.findBySiteUserAndRoom(room, siteUser);
     if (optRoomSiteUser.isPresent()) {

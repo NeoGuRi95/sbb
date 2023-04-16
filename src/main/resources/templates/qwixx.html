@@ -22,7 +22,8 @@
 
       // 구독 기능을 통해 해당 주소에 메세지가 오면 로그 출력
       stompClient.subscribe('/topic/qwixx/' + roomId, function (message) {
-        console.log(message.body);
+        var content = JSON.parse(message.body);
+        console.log(content);
       });
     });
   }

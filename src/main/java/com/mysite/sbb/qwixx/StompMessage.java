@@ -1,5 +1,7 @@
 package com.mysite.sbb.qwixx;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StompMessage {
-  private String sender;
   private Long roomId;
-  private Object data;
+
+  private String username;
+  
+  private String actionType;
+
+  private List<String> clickList;
 }

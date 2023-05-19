@@ -1,12 +1,10 @@
 package com.mysite.sbb.qwixx;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,98 +18,123 @@ import com.mysite.sbb.user.UserService;
 @RequiredArgsConstructor
 public class QwixxService {
 
-  private final RoomSiteUserRepository roomSiteUserRepository;
+  private final ParticipantRepository participantRepository;
   private final RoomRepository roomRepository;
   private final UserService userService;
+  private final QwixxUtil qwixxUtil;
 
-  public List<Room> getRoomList() {
-    return roomRepository.findAll();
-  }
-
-  public GameInfoResponse createGame(String username) {
+  /*신규 게임 방을 생성하는 메서드
+  * 신규 게임 방을 만든 참가자는 Master 권한이 부여됨.*/
+  public Room createNewRoom(String username) {
     SiteUser roomCreator = userService.getUser(username);
     Room newRoom = Room.builder()
-        .name(username + LocalDateTime.now())
+        .name(qwixxUtil.getRandomRoomName())
+        .isLive(true)
         .build();
-    RoomSiteUser firstRoomSiteUser = RoomSiteUser.builder()
+    Participant firstParticipant = Participant.builder()
+        .isMaster(true)
         .siteUser(roomCreator)
         .room(newRoom)
         .build();
-    firstRoomSiteUser.init();
+    firstParticipant.init();
     roomRepository.save(newRoom);
-    roomSiteUserRepository.save(firstRoomSiteUser);
-
-    GameInfoResponse response = new GameInfoResponse();
-    response.setRoomId(newRoom.getId());
-    response.addParticipant(firstRoomSiteUser);
-    return response;
+    participantRepository.save(firstParticipant);
+    return newRoom;
   }
 
-  public Room getRoom(Long roomId) {
-    return roomRepository.findById(roomId)
-        .orElseThrow(() -> new DataNotFoundException(ErrorCode.RESOURCE_NOT_FOUND));
-  }
-
-  public GameInfoResponse getGame(Room room, SiteUser siteUser) {
+  /*게임 방의 정보를 가져오기 전에 인수의 SiteUser가 해당 게임 방의 기존 참가자인지 먼저 확인함.
+  * 이후 새로운 참가자라면 기존 게임 방의 참가자수를 고려해 신규 참여 여부를 결정*/
+  public GameInfoResponse getGameInfo(Room room, SiteUser siteUser) {
     GameInfoResponse response = new GameInfoResponse();
     response.setRoomId(room.getId());
-    Optional<RoomSiteUser> optRoomSiteUser = roomSiteUserRepository.findBySiteUserAndRoom(room, siteUser);
-    if (optRoomSiteUser.isPresent()) {
-      // 이미 해당 게임 방에 입장했던 경우
-      List<RoomSiteUser> roomSiteUsers = roomSiteUserRepository.findAllByRoom(room);
-      response.setParticipants(roomSiteUsers);
+    // 참가자 추가 여부 결정 로직
+    Optional<Participant> optParticipant = participantRepository.findBySiteUserAndRoom(siteUser, room);
+    if (optParticipant.isPresent()) {
+      // 이미 해당 게임 방의 참가자인 경우
+      List<Participant> participants = participantRepository.findAllByRoom(room);
+      response.setParticipants(participants);
     } else {
       // 처음으로 해당 게임 방에 입장한 경우
-      List<RoomSiteUser> roomSiteUsers = roomSiteUserRepository.findAllByRoom(room);
-      if (roomSiteUsers.size() == 5) {
-        response.setFullRoom(true);
-      } else {
-        RoomSiteUser joinRoomSiteUser = RoomSiteUser.builder()
-            .siteUser(siteUser)
-            .room(room)
-            .build();
-        roomSiteUserRepository.save(joinRoomSiteUser);
-        roomSiteUsers.add(joinRoomSiteUser);
-        response.setParticipants(roomSiteUsers);
+      List<Participant> participants = participantRepository.findAllByRoom(room);
+      // 기존 게임 방의 참가자 수를 확인
+      if (participants.size() < 4) {
+        // 풀방이 아니면 새로운 참가자 생성
+        Participant newJoinParticipant = Participant.builder()
+          .isMaster(false)
+          .siteUser(siteUser)
+          .room(room)
+          .build();
+        newJoinParticipant.init();
+        participantRepository.save(newJoinParticipant);
+        participants.add(newJoinParticipant);
       }
+      response.setParticipants(participants);
     }
     return response;
   }
 
-  public void ready(Room room, SiteUser siteUser) {
-    RoomSiteUser roomSiteUser = roomSiteUserRepository.findBySiteUserAndRoom(room, siteUser)
+  /*해당 게임 방의 참가자 정보를 담아서 반환하는 메서드*/
+  public GameInfoResponse getGameInfo(Room room) {
+    GameInfoResponse response = new GameInfoResponse();
+    response.setRoomId(room.getId());
+    List<Participant> participants = participantRepository.findAllByRoom(room);
+    response.setParticipants(participants);
+    return response;
+  }
+
+  /*해당 게임 방의 참가자를 ready 상태로 변경하는 메서드*/
+  public void setReady(Room room, SiteUser siteUser) {
+    Participant participant = participantRepository.findBySiteUserAndRoom(siteUser, room)
         .orElseThrow(() -> new DataNotFoundException(ErrorCode.RESOURCE_NOT_FOUND));
-    roomSiteUser.setReady(true);
-    roomSiteUserRepository.save(roomSiteUser);
+    participant.setReady(true);
+    participantRepository.save(participant);
   }
 
-  public Boolean isAllReady(Room room) {
-    List<RoomSiteUser> roomSiteUsers = roomSiteUserRepository.findAllByRoom(room);
-    for (RoomSiteUser roomSiteUser : roomSiteUsers) {
-      if (Boolean.FALSE.equals(roomSiteUser.getReady()))
-        return false;
+  /*해당 게임 방의 참가자를 삭제하는 메서드
+  * 삭제 후 해당 게임 방에 참가자가 없을 경우 해당 게임 방을 비활성 상태로 변경*/
+  @Transactional
+  public void deleteParticipant(Room room, SiteUser siteUser) {
+    participantRepository.deleteBySiteUserAndRoom(siteUser, room);
+    if (participantRepository.findAllByRoom(room).isEmpty()) {
+      room.deactive();
+      roomRepository.save(room);
     }
-    return true;
   }
 
-  public Map<String, Integer> roll() {
-    Map<String, Integer> rollInfo = new HashMap<>();
-    rollInfo.put("white1", 0);
-    rollInfo.put("white2", 0);
-    rollInfo.put("red", 0);
-    rollInfo.put("yellow", 0);
-    rollInfo.put("green", 0);
-    rollInfo.put("blue", 0);
+  public void turnEnd(Room room, SiteUser siteUser, List<String> clickList) {
+    Participant participant = participantRepository.findBySiteUserAndRoom(siteUser, room)
+        .orElseThrow(() -> new DataNotFoundException(ErrorCode.RESOURCE_NOT_FOUND));
+    participant.setReady(true);
+    for (String click : clickList) {
+      String line = click.substring(0, click.length() - 1);
+      Integer number = Integer.parseInt(click.substring(click.length() - 1));
+      if (line.equals("red")) {
+        List<Integer> redLine = participant.getRedLine();
+        redLine.set(number - 2, 1);
+        participant.setRedLine(redLine);
+      } else if (line.equals("yellow")) {
+        List<Integer> yellowLine = participant.getYellowLine();
+        yellowLine.set(number - 2, 1);
+        participant.setYellowLine(yellowLine);
+      } else if (line.equals("green")) {
+        List<Integer> greenLine = participant.getGreenLine();
+        greenLine.set(-1 * (number - 12), 1);
+        participant.setGreenLine(greenLine);
+      } else if (line.equals("blue")) {
+        List<Integer> blueLine = participant.getBlueLine();
+        blueLine.set(-1 * (number - 12), 1);
+        participant.setBlueLine(blueLine);
+      }
+    }
+    participantRepository.save(participant);
+  }
 
-    rollInfo.put("whiteSum", 0);
-    rollInfo.put("redSum1", 0);
-    rollInfo.put("redSum2", 0);
-    rollInfo.put("yellowSum1", 0);
-    rollInfo.put("yellowSum2", 0);
-    rollInfo.put("greenSum1", 0);
-    rollInfo.put("greenSum2", 0);
-    rollInfo.put("blueSum1", 0);
-    rollInfo.put("blueSum2", 0);
-    return rollInfo;
+  /*해당 게임 방의 모든 참가자들의 준비 상태를 대기중(false)으로 변경*/
+  public void initializeRoomReady(Room room) {
+    List<Participant> participants = participantRepository.findAllByRoom(room);
+    for (Participant participant : participants) {
+      participant.setReady(false);
+    }
+    participantRepository.saveAll(participants);
   }
 }

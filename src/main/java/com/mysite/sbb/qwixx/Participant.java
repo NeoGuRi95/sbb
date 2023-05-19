@@ -23,12 +23,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RoomSiteUser {
+public class Participant {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private Boolean ready;
+  private Boolean isMaster;
+
+  private Boolean ready = false;
 
   @ManyToOne
   private Room room;
@@ -49,15 +51,16 @@ public class RoomSiteUser {
   private List<Integer> blueLine;
 
   @Builder
-  public RoomSiteUser(SiteUser siteUser, Room room) {
+  public Participant(Boolean isMaster, SiteUser siteUser, Room room) {
+    this.isMaster = isMaster;
     this.siteUser = siteUser;
     this.room = room;
   }
 
   public void init() {
-    this.redLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-    this.yellowLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-    this.greenLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-    this.blueLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.redLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.yellowLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.greenLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    this.blueLine = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   }
 }

@@ -1,35 +1,336 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
-  <input class="btn btn-outline-secondary" type="button" id="button-send" onclick="button_click();" value="주사위 던지기">
+
+  <div class="mb-3">
+    <button class="btn btn-outline-secondary" id="ready-button" onclick="ready_button_click();">준비하기</button>
+    <button class="btn btn-outline-secondary" id="roll-button" onclick="roll_button_click();">주사위 던지기</button>
+    <button class="btn btn-outline-secondary" id="tunr-end-button" onclick="turn_end_button_click();">턴 종료</button>
+    <button class="btn btn-outline-secondary" id="exit-button" onclick="exit_button_click();">나가기</button>
+  </div>
+
+  <div id="userInfo">
+    <table class="table">
+      <thead class="table-light">
+          <tr class="text-center">
+              <th id="th-p1">Player1</th>
+              <th id="th-p2">Player2</th>
+              <th id="th-p3">Player3</th>
+              <th id="th-p4">Player4</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr class="text-center">
+              <td id="td-p1">-</td>
+              <td id="td-p2">-</td>
+              <td id="td-p3">-</td>
+              <td id="td-p4">-</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="diceInfo">
+    <table class="table">
+      <thead class="table-light">
+          <tr class="text-center">
+              <th>White1</th>
+              <th>White2</th>
+              <th>Red</th>
+              <th>Yellow</th>
+              <th>Green</th>
+              <th>Blue</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr class="text-center">
+              <td id="White1">0</td>
+              <td id="White2">0</td>
+              <td id="Red">0</td>
+              <td id="Yellow">0</td>
+              <td id="Green">0</td>
+              <td id="Blue">0</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="diceSumInfo">
+    <table class="table">
+      <thead class="table-light">
+          <tr class="text-center">
+              <th>WhiteSum</th>
+              <th>RedSum1</th>
+              <th>RedSum2</th>
+              <th>YellowSum1</th>
+              <th>YellowSum2</th>
+              <th>GreenSum1</th>
+              <th>GreenSum2</th>
+              <th>BlueSum1</th>
+              <th>BlueSum2</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr class="text-center">
+              <td id="WhiteSum">0</td>
+              <td id="RedSum1">0</td>
+              <td id="RedSum2">0</td>
+              <td id="YellowSum1">0</td>
+              <td id="YellowSum2">0</td>
+              <td id="GreenSum1">0</td>
+              <td id="GreenSum2">0</td>
+              <td id="BlueSum1">0</td>
+              <td id="BlueSum2">0</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="cardList"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </div>
 
 <script layout:fragment="script" type='text/javascript'>
-  var stompClient = null;
-  var roomId = "[[${ gameResponse.roomId }]]";
+  const checkedColor = 'gray';
+  const roomId = "[[${ gameResponse.roomId }]]";
+  const username = "[[${#authentication.principal.username}]]";
+  const colorList = ["red", "yellow", "green", "blue"];
 
+  let clickList = [];
+
+  // 웹소켓 통신 로직
+  let stompClient = null;
   console.log('room info : ' + roomId);
-
   function connect() { // 생성된 소켓과 연결
-    var socket = new SockJS('/ws');
+    const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
-
       console.log('Connected: ' + frame);
-
-      // 구독 기능을 통해 해당 주소에 메세지가 오면 로그 출력
+      // 구독 기능을 통해 해당 주소에 메세지가 들어온 경우
       stompClient.subscribe('/topic/qwixx/' + roomId, function (message) {
-        var content = JSON.parse(message.body);
-        console.log(content);
+        const content = JSON.parse(message.body);
+        const usernames = content.usernames;
+        const readies = content.readys;
+        const redLineInfo = content.redLineInfo;
+        const yellowLineInfo = content.yellowLineInfo;
+        const greenLineInfo = content.greenLineInfo;
+        const blueLineInfo = content.blueLineInfo;
+
+        showDiceInfo(content);
+
+        showUserInfo(usernames, readies);
+
+        for (const username of usernames) {
+          if (username !== '-') {
+            const card = document.getElementById(username);
+            showRedLineInfo(card, redLineInfo[username]);
+            showYellowLineInfo(card, yellowLineInfo[username]);
+            showGreenLineInfo(card, greenLineInfo[username]);
+            showBlueLineInfo(card, blueLineInfo[username]);
+          }
+        }
+
+        addEventToMyCard(username);
       });
+
+      stompClient.send('/pub/qwixx', {}, JSON.stringify({roomId: roomId, username: username, actionType: "enter"}));
     });
   }
 
-  function button_click() {
-    stompClient.send('/pub/qwixx/roll', {}, JSON.stringify({roomId: roomId, data: "data", sender: "user"}));
+  function showDiceInfo(content) {
+    $('#White1').html(content.white1);
+    $('#White2').html(content.white2);
+    $('#Red').html(content.red);
+    $('#Yellow').html(content.yellow);
+    $('#Green').html(content.green);
+    $('#Blue').html(content.blue);
+
+    $('#WhiteSum').html(content.whiteSum);
+    $('#RedSum1').html(content.redSum1);
+    $('#RedSum2').html(content.redSum2);
+    $('#YellowSum1').html(content.yellowSum1);
+    $('#YellowSum2').html(content.yellowSum2);
+    $('#GreenSum1').html(content.greenSum1);
+    $('#GreenSum2').html(content.greenSum2);
+    $('#BlueSum1').html(content.blueSum1);
+    $('#BlueSum2').html(content.blueSum2);
+  }
+
+  // 플레이어 정보 및 플레이어의 카드 생성
+  function showUserInfo(usernames, readies) {
+    $('#cardList').empty();
+    for (const [index, name] of usernames.entries()) {
+      if (name === '-') {
+        $('#th-p' + (index + 1)).html('Player' + (index + 1));
+        $('#td-p' + (index + 1)).html('-');
+        const unnecessaryCard = $('.card' + (index + 1));
+        if (unnecessaryCard) unnecessaryCard.remove();
+      }
+      else {
+        const isReady = readies[index];
+        $('#th-p' + (index + 1)).html(name);
+        $('#td-p' + (index + 1)).html(isReady ? '준비완료' : '대기중');
+        if (!document.getElementById(name)) {
+          // 플레이어의 카드가 없다면
+          createCard(name, index);
+        }
+      }
+    }
+  }
+
+  function createCard(username, index) {
+    let card = '';
+    card += `<div id="${username}" class="mb-3 p-3 card${index + 1}" style="background-color: #BEC5CCFF">`;
+    card += `<div class="row m-1">`;
+    for (let j = 2; j <= 11; j++) {
+      card += `<div class="col">`;
+      card += `<div id="red${j}" class="rounded-3 text-center align-middle" style="background-color: red; color: white">${j}</div>`;
+      card += `</div>`;
+    }
+    card += `</div>`;
+    card += `<div class="row m-1">`;
+    for (let j = 2; j <= 11; j++) {
+      card += `<div class="col">`;
+      card += `<div id="yellow${j}" class="rounded-3 text-center align-middle" style="background-color: yellow; color: white">${j}</div>`;
+      card += `</div>`;
+    }
+    card += `</div>`;
+    card += `<div class="row m-1">`;
+    for (let j = 12; j >= 3; j--) {
+      card += `<div class="col">`;
+      card += `<div id="green${j}" class="rounded-3 text-center align-middle" style="background-color: green; color: white">${j}</div>`;
+      card += `</div>`;
+    }
+    card += `</div>`;
+    card += `<div class="row m-1">`;
+    for (let j = 12; j >= 3; j--) {
+      card += `<div class="col">`;
+      card += `<div id="blue${j}" class="rounded-3 text-center align-middle" style="background-color: blue; color: white">${j}</div>`;
+      card += `</div>`;
+    }
+    card += '</div>';
+    card += `</div>`;
+    const cardList = $('#cardList');
+    cardList.append(card);
+  }
+
+  function showRedLineInfo(card, redLine) {
+    for (let index in redLine) {
+      index = parseInt(index);
+      if (redLine[index] === 1) {
+        const redCol = card.querySelector('#red' + (index + 2));
+        redCol.style.backgroundColor = checkedColor;
+        redCol.classList.add('fixed');
+      }
+    }
+  }
+
+  function showYellowLineInfo(card, yellowLine) {
+    for (let index in yellowLine) {
+      index = parseInt(index);
+      if (yellowLine[index] === 1) {
+        const yellowCol = card.querySelector('#yellow' + (index + 2));
+        yellowCol.style.backgroundColor = checkedColor;
+        yellowCol.classList.add('fixed');
+      }
+    }
+  }
+
+  function showGreenLineInfo(card, greenLine) {
+    for (let index in greenLine) {
+      index = parseInt(index);
+      if (greenLine[index] === 1) {
+        const greenCol = card.querySelector('#green' + (12 - index));
+        greenCol.style.backgroundColor = checkedColor;
+        greenCol.classList.add('fixed');
+      }
+    }
+  }
+
+  function showBlueLineInfo(card, blueLine) {
+    for (let index in blueLine) {
+      index = parseInt(index);
+      if (blueLine[index] === 1) {
+        const blueCol = card.querySelector('#blue' + (12 - index));
+        blueCol.style.backgroundColor = checkedColor;
+        blueCol.classList.add('fixed');
+      }
+    }
+  }
+
+  function addEventToMyCard(username) {
+    const $card = $('#' + username)[0];
+    if ($card.classList.contains('haveEvent')) return;
+    else $card.classList.add('haveEvent');
+
+    for (let i = 0; i < 2; i++) {
+      const color = colorList[i];
+      for (let j = 2; j < 12; j++) {
+        const id = color + j;
+        const col = document.querySelector('#' + username + ' #' + id);
+        col.addEventListener('click', function() {
+          if (col.classList.contains('fixed')) {
+            console.log(id + ' is fixed element');
+          }
+          else if (col.classList.contains('clicked')) {
+            console.log(id + ' is unchecked.');
+            col.style.backgroundColor = color;
+            col.classList.remove('clicked');
+            clickList = clickList.filter((item) => item !== id);
+          }
+          else {
+            console.log(id + ' is checked.');
+            col.style.backgroundColor = checkedColor;
+            col.classList.add('clicked');
+            clickList = clickList.concat(id);
+          }
+        });
+      }
+    }
+    for (let i = 2; i < 4; i++) {
+      const color = colorList[i];
+      for (let j = 12; j > 2; j--) {
+        const id = color + j;
+        const col = $('#' + username + ' #' + id)[0];
+        col.addEventListener('click', function() {
+          if (col.classList.contains('fixed')) {
+            console.log(id + ' is fixed element');
+          }
+          else if (col.classList.contains('clicked')) {
+            console.log(id + ' is unchecked.');
+            col.style.backgroundColor = color;
+            col.classList.remove('clicked');
+            clickList = clickList.filter((item) => item !== id);
+          }
+          else {
+            console.log(id + ' is checked.');
+            col.style.backgroundColor = checkedColor;
+            col.classList.add('clicked');
+            clickList = clickList.concat(id);
+          }
+        });
+      }
+    }
+  }
+
+  function turn_end_button_click() {
+    stompClient.send('/pub/qwixx', {}, JSON.stringify({roomId: roomId, username: username, actionType: "turnEnd", clickList: clickList}));
+  }
+
+  function roll_button_click() {
+    stompClient.send('/pub/qwixx', {}, JSON.stringify({roomId: roomId, username: username, actionType: "roll"}));
+  }
+
+  function ready_button_click() {
+    stompClient.send('/pub/qwixx', {}, JSON.stringify({roomId: roomId, username: username, actionType: "ready"}));
+  }
+
+  function exit_button_click() {
+    stompClient.send('/pub/qwixx', {}, JSON.stringify({roomId: roomId, username: username, actionType: "exit"}));
+    disconnect();
+    window.location.href = '/qwixx/room/list';
   }
 
   function disconnect() { // 연결 종료
@@ -48,4 +349,5 @@
     disconnect();
   }
 </script>
+
 </html>

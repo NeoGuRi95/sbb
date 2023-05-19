@@ -2,16 +2,12 @@ package com.mysite.sbb.qwixx;
 
 import java.security.Principal;
 
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.mysite.sbb.qwixx.dto.GameInfoResponse;
 import com.mysite.sbb.user.SiteUser;
@@ -23,50 +19,34 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class QwixxController {
 
-  private final SimpMessageSendingOperations simpMessageSendingOperations;
-
   private final QwixxService qwixxService;
   private final UserService userService;
+  private final RoomSearchService roomSearchService;
 
   @GetMapping("/qwixx/room/list")
   public String getQwixxRoomList(Model model) {
-    model.addAttribute("roomList", qwixxService.getRoomList());
+    model.addAttribute("roomList", roomSearchService.getLiveRoomList());
     return "qwixx_room_list";
-  }
-
-  @GetMapping("/qwixx/room")
-  @PreAuthorize("isAuthenticated()")
-  public String create(Principal principal, Model model) {
-    GameInfoResponse response = qwixxService.createGame(principal.getName());
-    model.addAttribute("gameResponse", response);
-    return "qwixx";
   }
 
   @GetMapping("/qwixx/room/{id}")
   @PreAuthorize("isAuthenticated()")
   public String getRoom(@PathVariable("id") Long id, Principal principal, Model model) {
     SiteUser siteUser = userService.getUser(principal.getName());
-    Room room = qwixxService.getRoom(id);
-    GameInfoResponse response = qwixxService.getGame(room, siteUser);
-    if (Boolean.TRUE.equals(response.getFullRoom())) {
-      return "redirect:/";
-    } else {
+    Room room = roomSearchService.getRoom(id);
+    GameInfoResponse response = qwixxService.getGameInfo(room, siteUser);
+    if (response.isParticipant(siteUser.getUsername())) {
       model.addAttribute("gameResponse", response);
       return "qwixx";
+    } else {
+      return "redirect:/qwixx/room/list";
     }
   }
 
-  @MessageMapping("/qwixx/roll")
-  public void roll(StompMessage message) throws MessagingException, JsonProcessingException {
-    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), 
-      qwixxService.roll());
-  }
-
-  @MessageMapping("/qwixx/ready")
-  public void ready(StompMessage message) {
-    SiteUser siteUser = userService.getUser(message.getSender());
-    Room room = qwixxService.getRoom(message.getRoomId());
-    qwixxService.ready(room, siteUser);
-    simpMessageSendingOperations.convertAndSend("/topic/qwixx/" + message.getRoomId(), qwixxService.isAllReady(room));
+  @PostMapping("/qwixx/room")
+  @PreAuthorize("isAuthenticated()")
+  public String create(Principal principal) {
+    Room newRoom = qwixxService.createNewRoom(principal.getName());
+    return "redirect:/qwixx/room/" + newRoom.getId();
   }
 }

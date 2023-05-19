@@ -1,74 +1,63 @@
 package com.mysite.sbb.qwixx.dto;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
-import com.mysite.sbb.qwixx.RoomSiteUser;
+import com.mysite.sbb.qwixx.Participant;
 
 import lombok.Data;
 
 @Data
 public class GameInfoResponse {
   private Long roomId;
+  //참가자 정보
+  private Map<String, List<Integer>> redLineInfo = new HashMap<>();
+  private Map<String, List<Integer>> yellowLineInfo = new HashMap<>();
+  private Map<String, List<Integer>> greenLineInfo = new HashMap<>();
+  private Map<String, List<Integer>> blueLineInfo = new HashMap<>();
+  private List<String> usernames = Arrays.asList("-", "-", "-", "-");
+  private List<Boolean> readys = Arrays.asList(null, null, null, null);
+  private Boolean isAllReady = true;
+  private Boolean isFullRoom = false;
+  //주사위 정보
+  private Integer white1 = 0;
+  private Integer white2 = 0;
+  private Integer red = 0;
+  private Integer yellow = 0;
+  private Integer green = 0;
+  private Integer blue = 0;
+  private Integer whiteSum = 0;
+  private Integer redSum1 = 0;
+  private Integer redSum2 = 0;
+  private Integer yellowSum1 = 0;
+  private Integer yellowSum2 = 0;
+  private Integer greenSum1 = 0;
+  private Integer greenSum2 = 0;
+  private Integer blueSum1 = 0;
+  private Integer blueSum2 = 0;
 
-  private Boolean fullRoom = false;
-
-  private List<RoomSiteUser> participants = new ArrayList<>();
-
-  /*
-   * 주사위 정보
-   */
-  Random random = new Random();
-
-  private Integer white1;
-
-  private Integer white2;
-
-  private Integer red;
-
-  private Integer yellow;
-
-  private Integer green;
-
-  private Integer blue;
-
-  private Integer whiteSum;
-
-  private Integer redSum1;
-
-  private Integer redSum2;
-
-  private Integer yellowSum1;
-
-  private Integer yellowSum2;
-
-  private Integer greenSum1;
-
-  private Integer greenSum2;
-
-  private Integer blueSum1;
-
-  private Integer blueSum2;
-
-  public void addParticipant(RoomSiteUser roomSiteUser) {
-    participants.add(roomSiteUser);
+  public void setParticipants(List<Participant> participants) {
+    for (int i = 0; i < participants.size(); i++) {
+      Participant participant = participants.get(i);
+      String username = participant.getSiteUser().getUsername();
+      usernames.set(i, username);
+      readys.set(i, participant.getReady());
+      redLineInfo.put(username, participant.getRedLine());
+      yellowLineInfo.put(username, participant.getYellowLine());
+      greenLineInfo.put(username, participant.getGreenLine());
+      blueLineInfo.put(username, participant.getBlueLine());
+      if (participant.getReady() == false) this.isAllReady = false;
+    }
+    if (participants.size() == 4) isFullRoom = true;
   }
 
-  public void roll() {
-    this.white1 = this.random.nextInt(1, 7);
-    this.white2 = this.random.nextInt(1, 7);
-    this.red = this.random.nextInt(1, 7);
-    this.yellow = this.random.nextInt(1, 7);
-    this.green = this.random.nextInt(1, 7);
-    this.blue = this.random.nextInt(1, 7);
-
-    this.whiteSum = this.white1 + this.white2;
-    this.redSum1 = this.white1 + this.red;
-    this.redSum2 = this.white2 + this.red;
-    this.yellowSum1 = this.white1 + this.red;
-    this.yellowSum2 = this.white2 + this.red;
-    this.redSum1 = this.white1 + this.red;
-    this.redSum2 = this.white2 + this.red;
+  public Boolean isParticipant(String name) {
+    for (String username : usernames) {
+      if (username.equals(name)) return true;
+    }
+    return false;
   }
 }

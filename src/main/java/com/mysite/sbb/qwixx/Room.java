@@ -19,8 +19,15 @@ public class Room {
 
   private String name;
 
+  private Boolean isLive;
+
   @Builder
-  public Room(String name) {
+  public Room(String name, Boolean isLive) {
     this.name = name;
+    this.isLive = isLive;
+  }
+
+  public void deactive() {
+    this.isLive = false;
   }
 }
